@@ -1,36 +1,38 @@
-﻿using API.Interfaces;
+using API.Interfaces;
+using API.Problems.NPComplete.NPC_KERNEL.Verifiers;
 
 namespace API.Problems.NPComplete.NPC_KERNEL.Solvers;
 
 class KernelBruteForce : ISolver<KERNEL> {
-
-    // --- Fields ---
-    public string solverName { get; } = "Kernel Solver";
-    public string solverDefinition { get; } = "TODO";
-    public string source { get; } = "TODO";
+    public string solverName { get; } = "Finding Kernel Brute Force";
+    public string solverDefinition { get; } = "Enumerates vertex subsets and returns the first kernel, or an empty string if none exists. Returns an empty string if the timer expires.";
+    public string source { get; } = "Exhaustive subset enumeration using the kernel definition.";
     public string sourceFile { get; } = SourceFile.Path();
-    public string[] contributors { get; } = { "TODO" };
-    // Declared, not derived: read the algorithm below and decide; don't guess from the
-    // solver's name. Getting these wrong is a public correctness claim the API serves to callers.
-    // TODO: replace Unclassified. A test in redux-tests/Metadata fails until you do, on purpose. See Interfaces/SolverType.cs for what each value means.
-    public SolverType solverType { get; } = SolverType.Unclassified;
-    // TODO: replace Unclassified. A test in redux-tests/Metadata fails until you do, on purpose. See Interfaces/SolverComplexityBucket.cs for what each value means.
-    public SolverComplexityBucket complexityBucket { get; } = SolverComplexityBucket.Unclassified;
-    // TODO: replace "" with a confidently-known Big-O string such as "O(n log n)", never a guess. A test in redux-tests/Metadata fails until you do, on purpose.
-    public string complexity { get; } = "";
+    public string[] contributors { get; } = Array.Empty<string>();
     public bool timerHasExpired { get; set; }
-
-    // --- Methods Including Constructors ---
-    public KernelBruteForce() { }
+    public SolverType solverType { get; } = SolverType.BruteForce;
+    public SolverComplexityBucket complexityBucket { get; } = SolverComplexityBucket.Exponential;
+    public MathematicalFunction timeComplexity { get; } = new("2^n * (n + m)", ", n = number of vertices, m = number of arcs");
+    public MathematicalFunction spaceComplexity { get; } = new("n", ", n = number of vertices");
 
     public string solve(KERNEL problem) {
-        // TODO: implement KernelBruteForce for KERNEL
+        HashSet<string> chosen = new();
+        return Search(0) ?? string.Empty;
 
-        // make sure to check timerHasExpired occasionally, and return if it has
-        if (timerHasExpired)
-            return "timeout";
+        string? Search(int index) {
+            if (timerHasExpired) return null;
+            if (index == problem.nodes.Count) {
+                return KernelVerifier.IsKernel(problem, chosen)
+                    ? "{" + string.Join(",", problem.nodes.Where(chosen.Contains)) + "}"
+                    : null;
+            }
 
-        // An unfinished solver must fail loudly, not silently claim "no solution".
-        throw new NotImplementedException("TODO: implement KernelSolver for KERNEL");
+            string? answer = Search(index + 1);
+            if (answer != null || timerHasExpired) return answer;
+            chosen.Add(problem.nodes[index]);
+            answer = Search(index + 1);
+            chosen.Remove(problem.nodes[index]);
+            return answer;
+        }
     }
 }

@@ -1,50 +1,45 @@
-using System.Text.Json.Serialization;
 using API.Interfaces;
+using SPADE;
 
 namespace API.Problems.NPComplete.NPC_KERNEL.Verifiers;
 
 class KernelVerifier : IVerifier<KERNEL> {
-
-    // --- Fields ---
-    public const string CertificateGrammar = "TODO";
-    public const string CertificateExample = "TODO";
-    public string verifierName { get; } = "Kernel Verifier";
-    public string verifierDefinition { get; } = "TODO";
-    public string source { get; } = "TODO";
+    public const string CertificateGrammar = "S, a set of vertices in N with no internal arcs, and an arc u->v into S from every u outside S";
+    public const string CertificateExample = "{1,3}";
+    public string verifierName { get; } = "Finding Kernel Solution Verifier";
+    public string verifierDefinition { get; } = "Checks independence and that every vertex outside S has an outgoing arc into S.";
+    public string source { get; } = "https://users.encs.concordia.ca/~chvatal/kernel.html";
     public string sourceFile { get; } = SourceFile.Path();
-    public string sourceLink { get; } = "TODO";
-    public string[] contributors { get; } = { "TODO" };
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? complexity { get; set; } = null;
-    private string _certificate = "";
-
-    public string certificate {
-        get {
-            return _certificate;
-        }
-    }
-
-    // --- Methods Including Constructors ---
-    public KernelVerifier() {
-
-    }
+    public string[] contributors { get; } = Array.Empty<string>();
+    public string certificate { get; private set; } = string.Empty;
 
     public bool verify(KERNEL problem, string certificate) {
-        // On a malformed certificate, throw `CertificateParseException`
-        // (see Interfaces/ParseExceptions.cs) rather than silently
-        // returning false. The controller layer catches it and returns
-        // HTTP 400 with `problem.certificateFormat` quoted back to the
-        // caller. Example:
-        //
-        //   if (string.IsNullOrWhiteSpace(certificate)) {
-        //       throw new CertificateParseException(problem, certificate, "certificate is empty");
-        //   }
-        //
-        // Return false only when the certificate parses successfully but
-        // fails the verification predicate; return true when it satisfies it.
+        this.certificate = certificate;
+        string text = certificate.Trim();
+        if (!text.StartsWith('{') || !text.EndsWith('}')) {
+            throw new CertificateParseException(problem, certificate, "expected a set enclosed in braces, for example {1,3}");
+        }
+        HashSet<string> chosen;
+        try {
+            StringParser parser = new("{S | S is set}");
+            parser.parse(certificate);
+            chosen = parser["S"].ToList().Select(node => node.ToString()).ToHashSet();
+        } catch (Exception ex) when (ParseGuard.IsCertificateParseFailure(ex)) {
+            throw new CertificateParseException(problem, certificate, "expected a set of vertices, for example {1,3}", ex);
+        }
+        return IsKernel(problem, chosen);
+    }
 
-        // TODO: implement {VERIFIER} for {PROBLEM}
-        // An unfinished verifier must fail loudly, not accept every certificate.
-        throw new NotImplementedException("TODO: implement {VERIFIER} for {PROBLEM}");
+    internal static bool IsKernel(KERNEL problem, HashSet<string> chosen) {
+        if (!chosen.IsSubsetOf(problem.nodes)) return false;
+
+        HashSet<string> absorbed = new();
+        foreach (var arc in problem.edges) {
+            if (chosen.Contains(arc.Value)) {
+                if (chosen.Contains(arc.Key)) return false;
+                absorbed.Add(arc.Key);
+            }
+        }
+        return problem.nodes.All(node => chosen.Contains(node) || absorbed.Contains(node));
     }
 }
