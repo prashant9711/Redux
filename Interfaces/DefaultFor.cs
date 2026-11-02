@@ -37,9 +37,7 @@ internal static class ProblemDefaults {
     internal static readonly Type[] Kinds = { typeof(ISolver), typeof(IVerifier), typeof(IVisualization) };
 
     private static readonly Lazy<List<Declaration>> _declarations = new(() => Scan(
-        ProblemProvider.Solvers.Values
-            .Concat(ProblemProvider.Verifiers.Values)
-            .Concat(ProblemProvider.Visualizers.Values)));
+        AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes())));
 
     // Several declarations for one (problem, kind) are a mistake that DefaultFor_Tests reports;
     // until it is fixed the first by full name wins, so the choice at least doesn't vary by run.
