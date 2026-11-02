@@ -62,25 +62,24 @@ public class SolverReplay_Tests {
             }
             return distances;
         }
-        if (lastPartial is Assignment)
-            {
-                if (answer is "infeasible" or "unbounded" or "timeout")
-                    return new Assignment(
-                        Array.Empty<KeyValuePair<string, string>>()
-                    );
-
-                string[] values = answer.Trim()
-                    .Trim('(', ')')
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries);
-
+        if (lastPartial is Assignment) {
+            if (answer is "infeasible" or "unbounded" or "timeout")
                 return new Assignment(
-                    values.Select((value, index) =>
-                        new KeyValuePair<string, string>(
-                            $"x{index + 1}",
-                            value.Trim()
-                        ))
+                    Array.Empty<KeyValuePair<string, string>>()
                 );
-            }
+
+            string[] values = answer.Trim()
+                .Trim('(', ')')
+                .Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+            return new Assignment(
+                values.Select((value, index) =>
+                    new KeyValuePair<string, string>(
+                        $"x{index + 1}",
+                        value.Trim()
+                    ))
+            );
+        }
         throw new NotImplementedException(
             $"Add an expected final Partial for {lastPartial.GetType().Name} to SolverReplay_Tests.ExpectedFinalPartial.");
     }
