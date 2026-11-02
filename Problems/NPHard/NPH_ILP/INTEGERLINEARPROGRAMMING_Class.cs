@@ -31,7 +31,7 @@ class INTEGERLINEARPROGRAMMING : IProblem<IntegerLinearProgrammingSolver, Intege
     public List<BigInteger> c { get; private set; } = new();
     public List<List<BigInteger>> A { get; private set; } = new();
     public List<BigInteger> b { get; private set; } = new();
-
+    public ProblemVariant problemVariant { get; } = ProblemVariant.Optimization;
     public IntegerLinearProgrammingSolver defaultSolver { get; } = new();
     public IntegerLinearProgrammingVerifier defaultVerifier { get; } = new();
     public IntegerLinearProgrammingDefaultVisualization defaultVisualization { get; } = new();
