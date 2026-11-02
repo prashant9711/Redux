@@ -1,4 +1,5 @@
 namespace API.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 /// <summary>
 /// The time limit on compute requests (solve, verify, reduce, visualize and the other endpoints that run a reduction),
