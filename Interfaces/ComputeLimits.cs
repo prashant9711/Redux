@@ -1,4 +1,5 @@
 namespace API.Interfaces;
+
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
