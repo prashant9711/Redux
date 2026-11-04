@@ -13,10 +13,15 @@ class INTEGERLINEARPROGRAMMING : IProblem<IntegerLinearProgrammingSolver, Intege
     public string problemLink { get; } = "https://en.wikipedia.org/wiki/Integer_programming";
     public string formalDefinition { get; } = "Given an integer matrix A and integer vectors b and c, maximize c^T x subject to Ax <= b and x in Z^n.";
     public string inputDescription { get; } = "An objective coefficient vector c, a constraint matrix A, and a bound vector b.";
-    public string outputDescription { get; } = "An optimal integer vector (x1,...,xn), or infeasible, unbounded, or timeout. The visualization displays the objective value.";
-    public string problemDefinition { get; } = "Integer Linear Programming optimizes a linear objective subject to linear inequalities and integer-valued variables. This representation maximizes c^T x with Ax <= b. Variables may be any integers; express nonnegativity or other bounds as additional constraint rows. A minimum objective can be represented by negating its coefficients.";
-    public string source { get; } = "Gomory, R. E. (1958). Outline of an Algorithm for Integer Solutions to Linear Programs. Bulletin of the American Mathematical Society, 64(5), 275–278.";
-    public string sourceLink { get; } = "https://doi.org/10.1090/S0002-9904-1958-10224-4";
+    public string outputDescription { get; } =
+    "An optimal integer vector (x1,...,xn), or a status indicating infeasibility, unboundedness, or a time/work limit. The visualization displays the objective value.";
+    public string problemDefinition { get; } =
+    "Integer Linear Programming optimizes a linear objective subject to linear inequalities and integer-valued variables. This representation maximizes c^T x subject to Ax <= b. Variables may be any integers; express nonnegativity or other bounds as additional constraint rows. A minimum objective can be represented by negating its coefficients.";
+    public string source { get; } =
+        "Papadimitriou, C. H., and Steiglitz, K. (1982). Combinatorial Optimization: Algorithms and Complexity. Prentice-Hall.";
+
+    public string sourceLink { get; } =
+        "https://doi.org/10.1137/1.9780486144811";
     public string[] contributors { get; } = { "Prashant Pant" };
     public string sourceFile { get; } = SourceFile.Path();
     public string wikiName { get; } = "Integer_programming";
@@ -26,7 +31,8 @@ class INTEGERLINEARPROGRAMMING : IProblem<IntegerLinearProgrammingSolver, Intege
     public const string DefaultInstance = "((3,2),((1,1),(1,0),(0,1),(-1,0),(0,-1)),(4,2,3,0,0))";
     public string defaultInstance { get; } = DefaultInstance;
     public string instanceFormat { get; } = "Tuple (c,A,b), with comma-separated vectors and a matrix of row tuples. A must have b.Count rows and c.Count columns. Maximize c^T x over integer x with Ax <= b. Example: " + DefaultInstance;
-    public string certificateFormat { get; } = "An integer vector (x1,...,xn). The verifier checks that Ax <= b and that the solution achieves the maximum objective value c^T x. Example: (2,2).";
+    public string certificateFormat { get; } =
+    "An integer vector (x1,...,xn). The verifier checks that the assignment satisfies all constraints Ax <= b, but does not verify optimality. Example: (2,2).";
     public string instance { get; set; } = string.Empty;
     public List<BigInteger> c { get; private set; } = new();
     public List<List<BigInteger>> A { get; private set; } = new();

@@ -21,15 +21,26 @@ class IntegerLinearProgrammingDefaultVisualization : IVisualization<INTEGERLINEA
 
     public API_JSON SolvedVisualization(INTEGERLINEARPROGRAMMING problem, string solution) {
         if (string.IsNullOrWhiteSpace(solution)) return visualize(problem);
-        if (solution is "infeasible" or "unbounded" or "timeout")
+
+        if (solution is "infeasible" or "unbounded" || solution == SolveRun.TimedOutAnswer)
             return Build(problem, solution switch {
                 "infeasible" => "Infeasible: no integer assignment satisfies all constraints",
                 "unbounded" => "Unbounded: the objective can increase without limit",
                 _ => "Search stopped: time or work limit reached; no optimality claim"
             }, null);
+
         var assignment = IntegerLinearProgrammingVerifier.ParseAssignment(problem, solution);
-        bool feasible = new IntegerLinearProgrammingVerifier().verify(problem, solution);
-        return Build(problem, feasible ? "Solution assignment (feasible)" : "Solution assignment (infeasible)", assignment);
+
+        bool feasible = assignment is not null
+            && assignment.Count == problem.c.Count
+            && Enumerable.Range(0, problem.A.Count)
+                .All(i => IntegerLinearProgrammingSolver.Dot(problem.A[i], assignment) <= problem.b[i]);
+
+        return Build(
+            problem,
+            feasible ? "Solution assignment (feasible)" : "Solution assignment (infeasible)",
+            assignment
+        );
     }
 
     public List<API_JSON> StepsVisualization(INTEGERLINEARPROGRAMMING problem, List<object> steps) =>

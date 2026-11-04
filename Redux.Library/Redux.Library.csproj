@@ -13,8 +13,8 @@
     <Authors>Redux Contributors</Authors>
     <Description>A .NET library for computational problems, solvers, verifiers, reductions, and visualizations.</Description>
 
-    <PackageProjectUrl>https://github.com/prashant9711/Redux</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/prashant9711/Redux</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/ReduxISU/Redux</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ReduxISU/Redux</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>algorithms;redux;computer-science;graph-theory</PackageTags>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
@@ -37,9 +37,9 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="NCalc" Version="7.2.0" />
+    <PackageReference Include="NCalc" Version="7.3.0" />
     <PackageReference Include="SPADE" Version="0.1.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
   </ItemGroup>
 
   <ItemGroup>

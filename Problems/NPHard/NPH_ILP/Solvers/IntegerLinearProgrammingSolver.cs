@@ -7,9 +7,15 @@ namespace API.Problems.NPHard.NPH_ILP.Solvers;
 
 class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignment> {
     public string solverName => "Exact Integer Linear Programming Solver";
-    public string solverDefinition => "Exact Fourier-Motzkin relaxation, integer branching, and objective binary search. Returns an optimal vector, infeasible, unbounded, or timeout. A work limit also returns timeout.";
-    public string source => "Lawler, E. L., and Wood, D. E. (1966). Branch-and-Bound Methods: A Survey. Operations Research.";
-    public string sourceLink { get; } = "https://doi.org/10.1287/opre.14.4.699";
+    public string solverDefinition =>
+        "Exact integer linear programming solver using Fourier-Motzkin elimination, " +
+        "integer branching, and objective binary search. Returns an optimal integer " +
+        "assignment, infeasible, unbounded, or a time/work-limit status.";
+    public string source =>
+        "Papadimitriou, C. H. (1981). On the Complexity of Integer Programming. " +
+        "Journal of the ACM, 28(4), 765-768.";
+    public string sourceLink { get; } =
+        "https://doi.org/10.1145/322276.322287";
     public string sourceFile { get; } = SourceFile.Path();
     public string[] contributors { get; } = { "Prashant Pant" };
     public SolverType solverType => SolverType.Backtracking;
@@ -18,8 +24,13 @@ class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignm
     public MathematicalFunction timeComplexity { get; } = new(
     "2^(2^n) * 2^n * log(U)",
     "n = number of integer variables, U = objective search range");
-    // Elimination can grow exponentially. Never report a partial result as optimal.
-    public int WorkLimit { get; set; } = 200_000;
+    // Limits computational work during elimination and branching.
+    // If the limit is reached, the solver reports a timeout rather
+    // than incorrectly claiming that a partial solution is optimal.
+    public int WorkLimit { get; set; } = int.MaxValue;
+
+    // Maximum unique inequalities retained in one elimination stage.
+    public int MaxEliminationRows { get; set; } = 100_000;
 
     internal record Step(string Status, BigInteger[]? Assignment);
     private sealed class WorkExpiredException : Exception { }
@@ -27,6 +38,9 @@ class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignm
         private int remaining = owner.WorkLimit;
         public void Check() {
             if (owner.timerHasExpired || remaining-- <= 0) throw new WorkExpiredException();
+        }
+        public void CheckRows(int count) {
+            if (count > owner.MaxEliminationRows) throw new WorkExpiredException();
         }
     }
 
@@ -85,7 +99,7 @@ class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignm
             }
             return Finish(Format(best), best);
         } catch (WorkExpiredException) {
-            return Finish("timeout", null);
+            return Finish(SolveRun.TimedOutAnswer, null);
         }
 
         string Finish(string result, BigInteger[]? assignment) {
@@ -184,6 +198,13 @@ class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignm
         return point;
     }
 
+    // Fourier-Motzkin elimination projects a system of linear inequalities
+    // by eliminating one variable at a time.
+    //
+    // Reference:
+    // Schrijver, A. (1986). Theory of Linear and Integer Programming.
+    // Wiley, Chapter 12.
+
     private static List<BigInteger[]> Eliminate(List<BigInteger[]> rows, int index, Budget budget) {
         var positive = new List<BigInteger[]>();
         var negative = new List<BigInteger[]>();
@@ -214,7 +235,10 @@ class IntegerLinearProgrammingSolver : ISolver<INTEGERLINEARPROGRAMMING, Assignm
             if (gcd > 1)
                 for (int j = 0; j < row.Length; j++) row[j] /= gcd;
             if (row.Take(row.Length - 1).All(v => v.IsZero) && row[^1] >= 0) return;
-            if (seen.Add(string.Join(",", row))) result.Add(row);
+            if (seen.Add(string.Join(",", row))) {
+                budget.CheckRows(result.Count + 1);
+                result.Add(row);
+            }
         }
     }
 

@@ -1,15 +1,17 @@
 using System.Numerics;
 using API.Interfaces;
-using API.Problems.NPHard.NPH_ILP.Solvers;
 using SPADE;
 
 namespace API.Problems.NPHard.NPH_ILP.Verifiers;
 
 class IntegerLinearProgrammingVerifier : IVerifier<INTEGERLINEARPROGRAMMING> {
     public string verifierName { get; } = "Integer Linear Programming Solution Verifier";
+
     public string verifierDefinition { get; } =
-        "Checks that an integer vector satisfies Ax <= b and achieves the maximum objective value c^T x.";
-    public string source { get; } = "";
+        "Checks that an integer assignment has the correct number of variables and satisfies every constraint Ax <= b.";
+
+    public string source { get; } =
+        "Schrijver, A. (1986). Theory of Linear and Integer Programming. Wiley.";
     public string sourceFile { get; } = SourceFile.Path();
     public string certificate { get; } = "(2,2)";
     public string[] contributors { get; } = { "Prashant Pant" };
@@ -17,7 +19,7 @@ class IntegerLinearProgrammingVerifier : IVerifier<INTEGERLINEARPROGRAMMING> {
     public bool verify(INTEGERLINEARPROGRAMMING problem, string certificate) {
         var x = ParseAssignment(problem, certificate);
 
-        // Step 1: Check feasibility.
+        // Check that every constraint is satisfied.
         for (int i = 0; i < problem.A.Count; i++) {
             BigInteger total = BigInteger.Zero;
 
@@ -28,32 +30,7 @@ class IntegerLinearProgrammingVerifier : IVerifier<INTEGERLINEARPROGRAMMING> {
                 return false;
         }
 
-        // Step 2: Calculate the certificate's objective value.
-        BigInteger certificateValue = BigInteger.Zero;
-
-        for (int j = 0; j < x.Count; j++)
-            certificateValue += problem.c[j] * x[j];
-
-        // Step 3: Solve the ILP independently of the certificate.
-        var solver = new IntegerLinearProgrammingSolver();
-        string optimalResult = solver.solve(problem);
-
-        // Cannot certify optimality if the solver failed.
-        if (optimalResult == "infeasible" ||
-            optimalResult == "unbounded" ||
-            optimalResult == "timeout")
-            return false;
-
-        // Step 4: Calculate the optimal objective value.
-        var optimalX = ParseAssignment(problem, optimalResult);
-
-        BigInteger optimalValue = BigInteger.Zero;
-
-        for (int j = 0; j < optimalX.Count; j++)
-            optimalValue += problem.c[j] * optimalX[j];
-
-        // Step 5: Compare objective values.
-        return certificateValue == optimalValue;
+        return true;
     }
 
     internal static List<BigInteger> ParseAssignment(

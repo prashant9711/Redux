@@ -33,7 +33,11 @@
     <None Remove="Tools/ContributorStatsSync/**" />
   </ItemGroup>
 
-  <!-- Exclude NuGet library and its tests -->
+  <!--
+  The NuGet library and its test project are built separately.
+  Exclude their source files and resources from API.dll to prevent
+  duplicate compilation and conflicts between projects.
+  -->
   <ItemGroup>
     <Compile Remove="Redux.Library/**" />
     <Content Remove="Redux.Library/**" />
