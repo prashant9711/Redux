@@ -42,6 +42,7 @@ class KERNEL : IGraphProblem<KernelBruteForce, KernelVerifier, KernelDefaultVisu
     public UtilCollectionGraph graph { get; set; }
     public HashSet<int> vertices { get; set; }
     public List<(int u, int v)> edges { get; set; }
+    public ProblemVariant problemVariant { get; } = ProblemVariant.Decision;
     // --- Properties ---
     // --- Methods Including Constructors ---
     public KERNEL() : this(_defaultInstance) {
