@@ -26,7 +26,7 @@ class KERNEL : IGraphProblem<KernelBruteForce, KernelVerifier, KernelDefaultVisu
     public string sourceFile { get; } = SourceFile.Path();
     public string sourceLink { get; } = "https://users.encs.concordia.ca/~chvatal/kernel.html";
     public const string InstanceGrammar = "(V,E) | V is a set of nonnegative integer vertices; E is a set of directed edges (u,v), where u,v belong to V";
-    private static readonly string _defaultInstance = "({0,1,2,3},{(0,1),(1,2),(2,3),(3,0)})";
+    private static readonly string _defaultInstance = "({0,1,2,3},{(0,1),(1,2),(2,3)})";
     public string defaultInstance { get; } = _defaultInstance;
     public string instance { get; set; } = string.Empty;
     public string instanceFormat { get; } = $"Format: {InstanceGrammar} Example: {_defaultInstance}";
